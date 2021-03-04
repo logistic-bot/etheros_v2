@@ -61,6 +61,33 @@ void PageFrameAllocator::InitBitmap(size_t bitmapSize, void *bufferAddress)
     }
 }
 
+//void *PageFrameAllocator::request_page() // THIS IS UNOPTIMIZED, I ONLY KEEP IT FOR DEMONSTRATION
+//{
+//    for (uint64_t index = 0; index < page_bitmap.size * 8; index++)
+//    {
+//        if (page_bitmap[index] == true)
+//            continue;
+//        LockPage((void *)(index * 4096));
+//        return (void *)(index * 4096);
+//    }
+
+//    return NULL; // TODO: page frame swap to file
+//}
+
+uint64_t page_bitmap_index = 0;
+void *PageFrameAllocator::request_page()
+{
+    for (; page_bitmap_index < page_bitmap.size * 8; page_bitmap_index++)
+    {
+        if (page_bitmap[page_bitmap_index] == true)
+            continue;
+        LockPage((void *)(page_bitmap_index * 4096));
+        return (void *)(page_bitmap_index * 4096);
+    }
+
+    return NULL; // TODO: page frame swap to file
+}
+
 void PageFrameAllocator::FreePage(void *address)
 {
     uint64_t index = (uint64_t)address / 4096;
@@ -69,6 +96,9 @@ void PageFrameAllocator::FreePage(void *address)
     if (page_bitmap.set(index, false)) {
         freeMemory += 4096;
         usedMemory -= 4096;
+        if (page_bitmap_index > index) {
+                page_bitmap_index = index;
+        }
     }
 }
 
@@ -126,6 +156,9 @@ void PageFrameAllocator::UnreservePage(void *address)
     if (page_bitmap.set(index, false)) {
         freeMemory += 4096;
         reservedMemory -= 4096;
+        if (page_bitmap_index > index) {
+                page_bitmap_index = index;
+        }
     }
 }
 
@@ -148,17 +181,4 @@ uint64_t PageFrameAllocator::GetUsedRAM()
 uint64_t PageFrameAllocator::GetReservedRAM()
 {
     return reservedMemory;
-}
-
-void *PageFrameAllocator::request_page()
-{
-    for (uint64_t index = 0; index < page_bitmap.size * 8; index++)
-    {
-        if (page_bitmap[index] == true)
-            continue;
-        LockPage((void *)(index * 4096));
-        return (void *)(index * 4096);
-    }
-
-    return NULL; // TODO: page frame swap to file
 }

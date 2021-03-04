@@ -10,6 +10,23 @@ extern "C" void _start(BootInfo *bootInfo)
     BasicRenderer renderer = BasicRenderer(bootInfo->framebuffer, bootInfo->psf1_font);
 
     renderer.print("Kernel Initialized Sucessfully");
+    renderer.cursorPosition = {0,renderer.cursorPosition.y + 16};
+
+    uint64_t pages = 0;
+    while (true) {
+        void* result = allocator.request_page();
+        if (result == NULL) {
+            renderer.print("OOM");
+            renderer.cursorPosition = {0,renderer.cursorPosition.y + 16};
+            renderer.print(to_string(pages));
+            break;
+        }
+        pages += 1;
+        if (pages % 5000 == 0) {
+            renderer.print(to_string(pages));
+            renderer.cursorPosition = {0,renderer.cursorPosition.y + 16};
+        }
+    }
 
     // prevent crash on real hardware
     while(true);
