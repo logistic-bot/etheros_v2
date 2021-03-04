@@ -23,3 +23,8 @@ struct BootInfo
 extern uint64_t _KernelStart;
 extern uint64_t _KernelEnd;
 
+struct KernelInfo {
+    PageTableManager* page_table_manager;
+};
+
+KernelInfo initialize_kernel(BootInfo* boot_info);

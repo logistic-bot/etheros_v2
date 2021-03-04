@@ -11,6 +11,7 @@ cstr.h
 efiMemory.cpp
 efiMemory.h
 kernel.cpp
+kernelUtil.cpp
 kernelUtil.h
 math.h
 memory.cpp
