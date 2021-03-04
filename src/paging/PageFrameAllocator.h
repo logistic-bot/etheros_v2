@@ -1,8 +1,10 @@
-#pragma once
-#include "efiMemory.h"
+﻿#pragma once
+
 #include <stdint.h>
-#include "Bitmap.h"
-#include "memory.h"
+
+#include "../efiMemory.h"
+#include "../Bitmap.h"
+#include "../memory.h"
 
 class PageFrameAllocator
 {
@@ -19,7 +21,7 @@ public:
     uint64_t GetUsedRAM();
     uint64_t GetReservedRAM();
 
-    void *RequestPage();
+    void *request_page();
 
 private:
     void InitBitmap(size_t bitmapSize, void *bufferAddress);
@@ -29,3 +31,5 @@ private:
     void ReservePages(void *address, uint64_t page_count);
     void UnreservePages(void *address, uint64_t page_count);
 };
+
+extern PageFrameAllocator allocator;

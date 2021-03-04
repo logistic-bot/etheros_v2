@@ -1,11 +1,11 @@
-#include "PageFrameAllocator.h"
-#include "memory.h"
+﻿#include "PageFrameAllocator.h"
 
 uint64_t freeMemory;
 uint64_t reservedMemory;
 uint64_t usedMemory;
 
 bool Initialized = false;
+PageFrameAllocator allocator;
 
 void PageFrameAllocator::ReadEFIMemoryMap(EFI_MEMORY_DESCRIPTOR *mMap, size_t mMapSize, size_t mMapDescSize)
 {
@@ -66,9 +66,10 @@ void PageFrameAllocator::FreePage(void *address)
     uint64_t index = (uint64_t)address / 4096;
     if (page_bitmap[index] == false)
         return;
-    page_bitmap.set(index, false);
-    freeMemory += 4096;
-    usedMemory -= 4096;
+    if (page_bitmap.set(index, false)) {
+        freeMemory += 4096;
+        usedMemory -= 4096;
+    }
 }
 
 void PageFrameAllocator::FreePages(void *address, uint64_t page_count)
@@ -84,9 +85,10 @@ void PageFrameAllocator::LockPage(void *address)
     uint64_t index = (uint64_t)address / 4096;
     if (page_bitmap[index] == true)
         return;
-    page_bitmap.set(index, true);
-    freeMemory -= 4096;
-    usedMemory += 4096;
+    if (page_bitmap.set(index, true)) {
+        freeMemory -= 4096;
+        usedMemory += 4096;
+    }
 }
 
 void PageFrameAllocator::LockPages(void *address, uint64_t page_count)
@@ -102,9 +104,10 @@ void PageFrameAllocator::ReservePage(void *address)
     uint64_t index = (uint64_t)address / 4096;
     if (page_bitmap[index] == true)
         return;
-    page_bitmap.set(index, true);
-    freeMemory -= 4096;
-    reservedMemory += 4096;
+    if (page_bitmap.set(index, true)) {
+        freeMemory -= 4096;
+        reservedMemory += 4096;
+    }
 }
 
 void PageFrameAllocator::ReservePages(void *address, uint64_t page_count)
@@ -120,9 +123,10 @@ void PageFrameAllocator::UnreservePage(void *address)
     uint64_t index = (uint64_t)address / 4096;
     if (page_bitmap[index] == false)
         return;
-    page_bitmap.set(index, false);
-    freeMemory += 4096;
-    reservedMemory -= 4096;
+    if (page_bitmap.set(index, false)) {
+        freeMemory += 4096;
+        reservedMemory -= 4096;
+    }
 }
 
 void PageFrameAllocator::UnreservePages(void *address, uint64_t page_count)
@@ -146,7 +150,7 @@ uint64_t PageFrameAllocator::GetReservedRAM()
     return reservedMemory;
 }
 
-void *PageFrameAllocator::RequestPage()
+void *PageFrameAllocator::request_page()
 {
     for (uint64_t index = 0; index < page_bitmap.size * 8; index++)
     {
