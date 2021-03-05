@@ -20,6 +20,8 @@ interupts/IDT.cpp
 interupts/IDT.h
 interupts/interupts.cpp
 interupts/interupts.h
+io.cpp
+io.h
 kernel.cpp
 kernelUtil.cpp
 kernelUtil.h

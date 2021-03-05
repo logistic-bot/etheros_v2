@@ -2,6 +2,7 @@
 #include "gdt/gdt.h"
 #include "interupts/IDT.h"
 #include "interupts/interupts.h"
+#include "io.h"
 
 KernelInfo kernel_info;
 PageTableManager pageTableManager = NULL;
@@ -56,7 +57,28 @@ void prepare_interupts() {
     int_PageFault->type_attr = IDT_TA_InterruptGate;
     int_PageFault->selector = 0x08;
 
+    IDTDescEntry* int_DoubleFault = (IDTDescEntry*)(idtr.offset + 0x8 * sizeof(IDTDescEntry));
+    int_DoubleFault->set_offset((uint64_t)DoubleFault_handler);
+    int_DoubleFault->type_attr = IDT_TA_InterruptGate;
+    int_DoubleFault->selector = 0x08;
+
+    IDTDescEntry* int_GPFault = (IDTDescEntry*)(idtr.offset + 0xd * sizeof(IDTDescEntry));
+    int_GPFault->set_offset((uint64_t)GPFault_handler);
+    int_GPFault->type_attr = IDT_TA_InterruptGate;
+    int_GPFault->selector = 0x08;
+
+    IDTDescEntry* int_Keyboard = (IDTDescEntry*)(idtr.offset + 0x21 * sizeof(IDTDescEntry));
+    int_Keyboard->set_offset((uint64_t)KeyboardInterupt_handler);
+    int_Keyboard->type_attr = IDT_TA_InterruptGate;
+    int_Keyboard->selector = 0x08;
+
     asm("lidt %0" : : "m" (idtr));
+
+    remap_pic();
+
+    outb(PIC1_DATA, 0b11111101);
+    outb(PIC2_DATA, 0b11111111);
+    asm("sti");
 }
 
 BasicRenderer r = BasicRenderer(NULL, NULL);
