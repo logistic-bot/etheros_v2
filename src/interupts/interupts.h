@@ -1,5 +1,10 @@
 ﻿#pragma once
 #include "../BasicRenderer.h"
+#include "../panic.h"
+#include "../io.h"
+#include "../cstr.h"
+#include "../userinput/keyboard.h"
+#include "../userinput/mouse.h"
 
 #define PIC1_COMMAND 0x20
 #define PIC1_DATA 0x21
@@ -12,10 +17,11 @@
 #define ICW4_8086 0x01
 
 struct interrupt_frame;
-__attribute__((interrupt)) void PageFault_handler(struct interrupt_frame* frame);
-__attribute__((interrupt)) void DoubleFault_handler(struct interrupt_frame* frame);
-__attribute__((interrupt)) void GPFault_handler(struct interrupt_frame* frame);
-__attribute__((interrupt)) void KeyboardInterupt_handler(struct interrupt_frame* frame);
+__attribute__((interrupt)) void PageFault_handler(interrupt_frame* frame);
+__attribute__((interrupt)) void DoubleFault_handler(interrupt_frame* frame);
+__attribute__((interrupt)) void GPFault_handler(interrupt_frame* frame);
+__attribute__((interrupt)) void KeyboardInterupt_handler(interrupt_frame* frame);
+__attribute__((interrupt)) void MouseInterupt_handler(interrupt_frame* frame);
 
 void remap_pic();
 void pic_end_master();

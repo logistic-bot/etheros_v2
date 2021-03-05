@@ -1,8 +1,4 @@
 ﻿#include "kernelUtil.h"
-#include "gdt/gdt.h"
-#include "interupts/IDT.h"
-#include "interupts/interupts.h"
-#include "io.h"
 
 KernelInfo kernel_info;
 PageTableManager pageTableManager = NULL;
@@ -48,37 +44,26 @@ void prepare_memory(BootInfo* boot_info) {
 }
 
 IDTR idtr;
+void SetIDTGate(void* handler, uint8_t entry_offset, uint8_t type_attr, uint8_t selector) {
+    IDTDescEntry* interupt = (IDTDescEntry*)(idtr.offset + entry_offset * sizeof(IDTDescEntry));
+    interupt->set_offset((uint64_t)handler);
+    interupt->type_attr = type_attr;
+    interupt->selector = selector;
+}
+
 void prepare_interupts() {
     idtr.limit = 0x0fff;
     idtr.offset = (uint64_t)allocator.request_page();
 
-    IDTDescEntry* int_PageFault = (IDTDescEntry*)(idtr.offset + 0xe * sizeof(IDTDescEntry));
-    int_PageFault->set_offset((uint64_t)PageFault_handler);
-    int_PageFault->type_attr = IDT_TA_InterruptGate;
-    int_PageFault->selector = 0x08;
-
-    IDTDescEntry* int_DoubleFault = (IDTDescEntry*)(idtr.offset + 0x8 * sizeof(IDTDescEntry));
-    int_DoubleFault->set_offset((uint64_t)DoubleFault_handler);
-    int_DoubleFault->type_attr = IDT_TA_InterruptGate;
-    int_DoubleFault->selector = 0x08;
-
-    IDTDescEntry* int_GPFault = (IDTDescEntry*)(idtr.offset + 0xd * sizeof(IDTDescEntry));
-    int_GPFault->set_offset((uint64_t)GPFault_handler);
-    int_GPFault->type_attr = IDT_TA_InterruptGate;
-    int_GPFault->selector = 0x08;
-
-    IDTDescEntry* int_Keyboard = (IDTDescEntry*)(idtr.offset + 0x21 * sizeof(IDTDescEntry));
-    int_Keyboard->set_offset((uint64_t)KeyboardInterupt_handler);
-    int_Keyboard->type_attr = IDT_TA_InterruptGate;
-    int_Keyboard->selector = 0x08;
+    SetIDTGate((void*)PageFault_handler, 0xe, IDT_TA_InterruptGate, 0x08);
+    SetIDTGate((void*)DoubleFault_handler, 0x8, IDT_TA_InterruptGate, 0x08);
+    SetIDTGate((void*)GPFault_handler, 0xd, IDT_TA_InterruptGate, 0x08);
+    SetIDTGate((void*)KeyboardInterupt_handler, 0x21, IDT_TA_InterruptGate, 0x08);
+    SetIDTGate((void*)MouseInterupt_handler, 0x2c, IDT_TA_InterruptGate, 0x08);
 
     asm("lidt %0" : : "m" (idtr));
 
     remap_pic();
-
-    outb(PIC1_DATA, 0b11111101);
-    outb(PIC2_DATA, 0b11111111);
-    asm("sti");
 }
 
 BasicRenderer r = BasicRenderer(NULL, NULL);
@@ -100,6 +85,15 @@ KernelInfo initialize_kernel(BootInfo* boot_info) {
 
     // prepare interupts
     prepare_interupts();
+
+    init_ps2mouse();
+
+    // set interupts bits
+    outb(PIC1_DATA, 0b11111001);
+    outb(PIC2_DATA, 0b11101111);
+
+    // enable interupts
+    asm("sti");
 
     return kernel_info;
 }

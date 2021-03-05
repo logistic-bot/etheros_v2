@@ -1,8 +1,4 @@
 ﻿#include "interupts.h"
-#include "../panic.h"
-#include "../io.h"
-#include "../cstr.h"
-#include "../keyboard/keyboard.h"
 
 __attribute__((interrupt)) void PageFault_handler(struct interrupt_frame* frame) {
     panic("Page fault detected");
@@ -22,9 +18,13 @@ __attribute__((interrupt)) void DoubleFault_handler(struct interrupt_frame* fram
 __attribute__((interrupt)) void KeyboardInterupt_handler(struct interrupt_frame* frame) {
     uint8_t scancode = inb(0x60);
     HandleKeyboard(scancode);
-//    renderer->print(to_hstring(scancode));
-//    renderer->next();
     pic_end_master();
+}
+
+__attribute__((interrupt)) void MouseInterupt_handler(interrupt_frame* frame) {
+    uint8_t mouse_data = inb(0x60);
+    handle_ps2_mouse(mouse_data);
+    pic_end_slave();
 }
 
 void pic_end_master() {

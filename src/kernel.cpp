@@ -10,6 +10,11 @@ extern "C" void _start(BootInfo *bootInfo)
     renderer->print("Kernel Initialized Sucessfully");
     renderer->next();
 
+    // main kernel loop
+    while (true) {
+        process_mouse_packets();
+    }
+
 //    uint64_t pages = 0;
 //    while (true) {
 //        void* result = allocator.request_page();

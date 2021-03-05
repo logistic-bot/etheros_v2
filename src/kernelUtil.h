@@ -1,15 +1,20 @@
 ﻿#pragma once
 
-#include <stddef.h>
 #include "BasicRenderer.h"
+#include "Bitmap.h"
 #include "cstr.h"
 #include "efiMemory.h"
+#include "gdt/gdt.h"
+#include "interupts/IDT.h"
+#include "interupts/interupts.h"
+#include "io.h"
 #include "memory.h"
-#include "Bitmap.h"
 #include "paging/PageFrameAllocator.h"
 #include "paging/PageMapIndexer.h"
 #include "paging/PageTableManager.h"
 #include "paging/paging.h"
+#include "userinput/mouse.h"
+#include <stddef.h>
 
 struct BootInfo
 {

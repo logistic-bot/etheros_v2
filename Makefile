@@ -7,7 +7,7 @@ LDS = kernel.ld
 ASMC = nasm
 CC = gcc
 
-CFLAGS = -ffreestanding -fshort-wchar -static -Wall -Wpedantic -Wextra -fpermissive
+CFLAGS = -ffreestanding -fshort-wchar -static -Wall -Wpedantic -Wextra -fpermissive -mno-red-zone
 ASMFLAGS = -wall
 LDFLAGS = -T $(LDS) -static -Bsymbolic -nostdlib
 
