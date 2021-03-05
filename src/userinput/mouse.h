@@ -13,6 +13,7 @@
 #define PS2XOVERFLOW    0b01000000
 #define PS2YOVERFLOW    0b10000000
 
+extern uint8_t mouse_pointer[];
 
 void init_ps2mouse();
 void handle_ps2_mouse(uint8_t data);

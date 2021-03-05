@@ -1,5 +1,26 @@
 ﻿#include "mouse.h"
 
+uint8_t mouse_pointer[] = {
+   0b10000000, 0b00000000,
+   0b11000000, 0b00000000,
+   0b11100000, 0b00000000,
+   0b11110000, 0b00000000,
+   0b11111000, 0b00000000,
+   0b11111100, 0b00000000,
+   0b11110000, 0b00000000,
+   0b11000000, 0b00000000,
+   0b00000000, 0b00000000,
+   0b00000000, 0b00000000,
+   0b00000000, 0b00000000,
+   0b00000000, 0b00000000,
+   0b00000000, 0b00000000,
+   0b00000000, 0b00000000,
+   0b00000000, 0b00000000,
+   0b00000000, 0b00000000,
+   0b00000000, 0b00000000,
+   0b00000000, 0b00000000,
+};
+
 void mouse_wait() {
     uint64_t timeout = 100000;
     while (timeout--) {
@@ -34,6 +55,7 @@ uint8_t mouse_cycle = 0;
 uint8_t mouse_packets[4];
 bool mouse_packet_ready = false;
 Point mouse_position;
+Point old_mouse_position;
 void handle_ps2_mouse(uint8_t data) {
     switch (mouse_cycle) {
         case 0:
@@ -79,7 +101,6 @@ void init_ps2mouse() {
 
 void process_mouse_packets() {
     if (!mouse_packet_ready) return;
-    mouse_packet_ready = false;
     bool x_negative, y_negative, x_overflow, y_overflow;
 
     if (mouse_packets[0] & PS2XSIGN) {
@@ -133,9 +154,12 @@ void process_mouse_packets() {
     }
 
     if (mouse_position.x < 0) mouse_position.x = 0;
-    if (mouse_position.x > renderer->targetFramebuffer->Width - 8) mouse_position.x = renderer->targetFramebuffer->Width - 8;
+    if (mouse_position.x > renderer->targetFramebuffer->Width - 1) mouse_position.x = renderer->targetFramebuffer->Width - 1;
     if (mouse_position.y < 0) mouse_position.y = 0;
-    if (mouse_position.y > renderer->targetFramebuffer->Height - 16) mouse_position.y = renderer->targetFramebuffer->Height - 16;
+    if (mouse_position.y > renderer->targetFramebuffer->Height - 1) mouse_position.y = renderer->targetFramebuffer->Height - 1;
 
-    renderer->putChar('m', mouse_position.x, mouse_position.y);
+    renderer->clear_mouse_cursor(old_mouse_position, mouse_pointer);
+    renderer->draw_overlay_mouse_cursor(mouse_position, mouse_pointer);
+    old_mouse_position = mouse_position;
+    mouse_packet_ready = false;
 }
