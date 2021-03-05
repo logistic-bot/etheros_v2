@@ -12,9 +12,12 @@ public:
     Framebuffer *targetFramebuffer;
     PSF1_FONT *font;
     unsigned int color;
+    unsigned int background_color;
     void print(const char *str);
     void putChar(char chr, unsigned int xOff, unsigned int yOff);
-    void clear(uint32_t color);
+    void putChar(char chr);
+    void clear_char();
+    void clear();
     void next();
     void center();
 };

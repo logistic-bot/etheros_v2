@@ -8,7 +8,7 @@ extern "C" void _start(BootInfo *bootInfo)
     PageTableManager *pageTableManager = kernel_info.page_table_manager;
 
     renderer->print("Kernel Initialized Sucessfully");
-    renderer->cursorPosition = {0,renderer->cursorPosition.y + 16};
+    renderer->next();
 
 //    uint64_t pages = 0;
 //    while (true) {

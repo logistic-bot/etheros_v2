@@ -2,6 +2,7 @@
 #include "../panic.h"
 #include "../io.h"
 #include "../cstr.h"
+#include "../keyboard/keyboard.h"
 
 __attribute__((interrupt)) void PageFault_handler(struct interrupt_frame* frame) {
     panic("Page fault detected");
@@ -20,8 +21,9 @@ __attribute__((interrupt)) void DoubleFault_handler(struct interrupt_frame* fram
 
 __attribute__((interrupt)) void KeyboardInterupt_handler(struct interrupt_frame* frame) {
     uint8_t scancode = inb(0x60);
-    renderer->print(to_hstring(scancode));
-    renderer->next();
+    HandleKeyboard(scancode);
+//    renderer->print(to_hstring(scancode));
+//    renderer->next();
     pic_end_master();
 }
 

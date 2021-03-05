@@ -25,6 +25,10 @@ io.h
 kernel.cpp
 kernelUtil.cpp
 kernelUtil.h
+keyboard/keyboard.cpp
+keyboard/keyboard.h
+keyboard/scancodes.cpp
+keyboard/scancodes.h
 math.h
 memory.cpp
 memory.h

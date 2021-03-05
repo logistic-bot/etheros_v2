@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
 struct Point
 {
-    unsigned int x;
-    unsigned int y;
+    long int x;
+    long int y;
 };
