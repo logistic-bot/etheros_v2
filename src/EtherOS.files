@@ -32,4 +32,6 @@ paging/PageTableManager.cpp
 paging/PageTableManager.h
 paging/paging.cpp
 paging/paging.h
+panic.cpp
+panic.h
 simpleFonts.h
