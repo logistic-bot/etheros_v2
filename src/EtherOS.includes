@@ -1,2 +1,5 @@
 .
 paging
+../
+gdt
+interupts

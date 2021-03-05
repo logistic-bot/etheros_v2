@@ -1,4 +1,6 @@
-#include "BasicRenderer.h"
+﻿#include "BasicRenderer.h"
+
+BasicRenderer* renderer;
 
 BasicRenderer::BasicRenderer(Framebuffer *targetFramebuffer_, PSF1_FONT *font_)
 {

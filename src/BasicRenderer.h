@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "math.h"
 #include "Framebuffer.h"
 #include "simpleFonts.h"
@@ -14,3 +14,5 @@ public:
     void print(const char *str);
     void putChar(char chr, unsigned int xOff, unsigned int yOff);
 };
+
+extern BasicRenderer* renderer;

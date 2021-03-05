@@ -4,9 +4,11 @@ OSNAME = CustomOS
 GNUEFI = ../gnu-efi
 OVMFDIR = ../OVMFbin
 LDS = kernel.ld
+ASMC = nasm
 CC = gcc
 
 CFLAGS = -ffreestanding -fshort-wchar -static -Wall -Wpedantic -Wextra -fpermissive
+ASMFLAGS = -wall
 LDFLAGS = -T $(LDS) -static -Bsymbolic -nostdlib
 
 SRCDIR := src
@@ -17,7 +19,10 @@ BOOTEFI := $(GNUEFI)/x86_64/bootloader/main.efi
 rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
 
 SRC = $(call rwildcard,$(SRCDIR),*.cpp)
+ASMSRC = $(call rwildcard,$(SRCDIR),*.asm)
 OBJS = $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRC))
+OBJS += $(patsubst $(SRCDIR)/%.asm, $(OBJDIR)/%_asm.o, $(ASMSRC))
+
 DIRS = $(wildcard $(SRCDIR)/*)
 
 run:
@@ -30,10 +35,20 @@ vars:
 	
 kernel: $(OBJS) link
 
+$(OBJDIR)/interupts/interupts.o: $(SRCDIR)/interupts/interupts.cpp
+	@echo !==== COMPILING $^
+	@mkdir -p $(@D)
+	$(CC) -mno-red-zone -mgeneral-regs-only -ffreestanding -c $^ -o $@
+
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@echo !==== COMPILING $^
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $^ -o $@
+	
+$(OBJDIR)/%_asm.o: $(SRCDIR)/%.asm
+	@echo !==== COMPILING $^
+	@mkdir -p $(@D)
+	$(ASMC) $(ASMFLAGS) $^ -f elf64 -o $@
 
 link:
 	@echo !==== LINKING

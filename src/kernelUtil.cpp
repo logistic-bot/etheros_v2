@@ -1,4 +1,7 @@
 ﻿#include "kernelUtil.h"
+#include "gdt/gdt.h"
+#include "interupts/IDT.h"
+#include "interupts/interupts.h"
 
 KernelInfo kernel_info;
 PageTableManager pageTableManager = NULL;
@@ -43,11 +46,38 @@ void prepare_memory(BootInfo* boot_info) {
     kernel_info.page_table_manager = &pageTableManager;
 }
 
+IDTR idtr;
+void prepare_interupts() {
+    idtr.limit = 0x0fff;
+    idtr.offset = (uint64_t)allocator.request_page();
+
+    IDTDescEntry* int_PageFault = (IDTDescEntry*)(idtr.offset + 0xe * sizeof(IDTDescEntry));
+    int_PageFault->set_offset((uint64_t)PageFault_handler);
+    int_PageFault->type_attr = IDT_TA_InterruptGate;
+    int_PageFault->selector = 0x08;
+
+    asm("lidt %0" : : "m" (idtr));
+}
+
+BasicRenderer r = BasicRenderer(NULL, NULL);
 KernelInfo initialize_kernel(BootInfo* boot_info) {
+    // prepare global renderer
+    r = BasicRenderer(boot_info->framebuffer, boot_info->psf1_font);
+    renderer = &r;
+
+    // Load new GDT
+    GDTDescriptor gdtDescriptor;
+    gdtDescriptor.size = sizeof(GDT) - 1;
+    gdtDescriptor.offset = (uint64_t)&default_gdt;
+    LoadGDT(&gdtDescriptor);
+
     prepare_memory(boot_info);
 
     // Cleak screen
     memset(boot_info->framebuffer->BaseAddress, 0, boot_info->framebuffer->BufferSize);
+
+    // prepare interupts
+    prepare_interupts();
 
     return kernel_info;
 }
