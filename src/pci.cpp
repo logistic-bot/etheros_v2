@@ -13,10 +13,14 @@ void enumerate_function(uint64_t device_address, uint64_t function) {
         return;
 
     renderer->print(get_vendor_name(pci_device_header->vendor_id));
-    renderer->print(" ");
+    renderer->print(" / ");
     renderer->print(get_device_name(pci_device_header->vendor_id, pci_device_header->device_id));
-    renderer->print(" ");
+    renderer->print(" / ");
     renderer->print(device_classes[pci_device_header->class_id]);
+    renderer->print(" / ");
+    renderer->print(get_subclass_name(pci_device_header->class_id, pci_device_header->subclass_id));
+    renderer->print(" / ");
+    renderer->print(get_program_interface_name(pci_device_header->class_id, pci_device_header->subclass_id, pci_device_header->program_interface));
     renderer->next();
 }
 

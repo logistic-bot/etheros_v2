@@ -27,4 +27,6 @@ extern const char* device_classes[];
 
 const char* get_vendor_name(uint16_t vendor_id);
 const char* get_device_name(uint16_t vendor_id, uint16_t device_id);
+const char* get_subclass_name(uint8_t class_id, uint8_t subclass_id);
+const char* get_program_interface_name(uint8_t class_id, uint8_t subclass_id, uint8_t program_interface);
 }
