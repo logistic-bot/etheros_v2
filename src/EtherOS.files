@@ -55,6 +55,7 @@ paging/paging.cpp
 paging/paging.h
 panic.cpp
 panic.h
+pci_descriptors.cpp
 simpleFonts.h
 userinput/keyboard.cpp
 userinput/keyboard.h

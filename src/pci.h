@@ -22,4 +22,8 @@ struct PCIDeviceHeader {
 };
 
 void enumerate_PCI(ACPI::MCFGHeader* mcfg);
+
+extern const char* device_classes[];
+
+const char* get_vendor_name(uint16_t vendor_id);
 }
