@@ -1,30 +1,48 @@
-﻿#include "mouse.h"
+#include "mouse.h"
 
 uint8_t mouse_pointer[] = {
-   0b10000000, 0b00000000,
-   0b11000000, 0b00000000,
-   0b11100000, 0b00000000,
-   0b11110000, 0b00000000,
-   0b11111000, 0b00000000,
-   0b11111100, 0b00000000,
-   0b11110000, 0b00000000,
-   0b11000000, 0b00000000,
-   0b00000000, 0b00000000,
-   0b00000000, 0b00000000,
-   0b00000000, 0b00000000,
-   0b00000000, 0b00000000,
-   0b00000000, 0b00000000,
-   0b00000000, 0b00000000,
-   0b00000000, 0b00000000,
-   0b00000000, 0b00000000,
-   0b00000000, 0b00000000,
-   0b00000000, 0b00000000,
+    0b10000000,
+    0b00000000,
+    0b11000000,
+    0b00000000,
+    0b11100000,
+    0b00000000,
+    0b11110000,
+    0b00000000,
+    0b11111000,
+    0b00000000,
+    0b11111100,
+    0b00000000,
+    0b11110000,
+    0b00000000,
+    0b11000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
 };
 
 void mouse_wait() {
     uint64_t timeout = 100000;
     while (timeout--) {
-        if ((inb(0x64) & 0b10) == 0)  {
+        if ((inb(0x64) & 0b10) == 0) {
             return;
         }
     }
@@ -33,7 +51,7 @@ void mouse_wait() {
 void mouse_wait_input() {
     uint64_t timeout = 100000;
     while (timeout--) {
-        if (inb(0x64) & 0b1)  {
+        if (inb(0x64) & 0b1) {
             return;
         }
     }
@@ -58,23 +76,27 @@ Point mouse_position;
 Point old_mouse_position;
 void handle_ps2_mouse(uint8_t data) {
     switch (mouse_cycle) {
-        case 0:
-            if (mouse_packet_ready) break;
-            if (data & 0b00001000 == 0) break;
-            mouse_packets[0] = data;
-            mouse_cycle++;
+    case 0:
+        if (mouse_packet_ready)
             break;
-        case 1:
-            if (mouse_packet_ready) break;
-            mouse_packets[1] = data;
-            mouse_cycle++;
+        if (data & 0b00001000 == 0)
             break;
-        case 2:
-            if (mouse_packet_ready) break;
-            mouse_packets[2] = data;
-            mouse_packet_ready = true;
-            mouse_cycle = 0;
+        mouse_packets[0] = data;
+        mouse_cycle++;
+        break;
+    case 1:
+        if (mouse_packet_ready)
             break;
+        mouse_packets[1] = data;
+        mouse_cycle++;
+        break;
+    case 2:
+        if (mouse_packet_ready)
+            break;
+        mouse_packets[2] = data;
+        mouse_packet_ready = true;
+        mouse_cycle = 0;
+        break;
     }
 }
 
@@ -100,7 +122,8 @@ void init_ps2mouse() {
 }
 
 void process_mouse_packets() {
-    if (!mouse_packet_ready) return;
+    if (!mouse_packet_ready)
+        return;
     bool x_negative, y_negative, x_overflow, y_overflow;
 
     if (mouse_packets[0] & PS2XSIGN) {
@@ -153,13 +176,32 @@ void process_mouse_packets() {
         }
     }
 
-    if (mouse_position.x < 0) mouse_position.x = 0;
-    if (mouse_position.x > renderer->targetFramebuffer->Width - 1) mouse_position.x = renderer->targetFramebuffer->Width - 1;
-    if (mouse_position.y < 0) mouse_position.y = 0;
-    if (mouse_position.y > renderer->targetFramebuffer->Height - 1) mouse_position.y = renderer->targetFramebuffer->Height - 1;
+    if (mouse_position.x < 0)
+        mouse_position.x = 0;
+    if (mouse_position.x > renderer->targetFramebuffer->Width - 1)
+        mouse_position.x = renderer->targetFramebuffer->Width - 1;
+    if (mouse_position.y < 0)
+        mouse_position.y = 0;
+    if (mouse_position.y > renderer->targetFramebuffer->Height - 1)
+        mouse_position.y = renderer->targetFramebuffer->Height - 1;
 
     renderer->clear_mouse_cursor(old_mouse_position, mouse_pointer);
+
+    unsigned int old_color = renderer->color;
+    renderer->color = 0xffffffff;
+    if (mouse_packets[0] & PS2LEFTBUTTON) {
+        renderer->color = 0x00ffff00;
+    }
+    if (mouse_packets[0] & PS2RIGHTBUTTON) {
+        renderer->color = 0x0000ffff;
+    }
+    if (mouse_packets[0] & PS2MIDDLEBUTTON) {
+        renderer->color = 0x00ff00ff;
+    }
+
     renderer->draw_overlay_mouse_cursor(mouse_position, mouse_pointer);
+    renderer->color = old_color;
+
     old_mouse_position = mouse_position;
     mouse_packet_ready = false;
 }
