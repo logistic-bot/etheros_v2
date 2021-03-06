@@ -5,3 +5,4 @@ gdt
 interupts
 keyboard
 userinput
+../../gnu-efi/bootloader

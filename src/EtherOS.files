@@ -1,4 +1,6 @@
 ../Makefile
+pci.h
+pci.cpp
 BasicRenderer.cpp
 BasicRenderer.h
 Bitmap.cpp
@@ -7,6 +9,8 @@ EtherOS.cflags
 EtherOS.cxxflags
 Framebuffer.h
 Makefile
+acpi.cpp
+acpi.h
 cstr.cpp
 cstr.h
 efiMemory.cpp

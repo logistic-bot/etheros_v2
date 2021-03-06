@@ -1,7 +1,6 @@
-﻿#include "kernelUtil.h"
+#include "kernelUtil.h"
 
 KernelInfo kernel_info;
-PageTableManager pageTableManager = NULL;
 void prepare_memory(BootInfo* boot_info) {
     // calculate number of memory map entries
     uint64_t mMapEntries = boot_info->mMapSize / boot_info->mMapDescSize;
@@ -19,11 +18,11 @@ void prepare_memory(BootInfo* boot_info) {
     PageTable* PML4 = (PageTable*)allocator.request_page();
     memset(PML4, 0, 0x1000);
 
-    pageTableManager = PageTableManager(PML4);
+    g_page_table_manager = PageTableManager(PML4);
 
     // Custom memory map (?)
-    for (uint64_t i = 0; i < get_memory_size(boot_info->mMap, mMapEntries, boot_info->mMapDescSize); i+=0x1000) {
-        pageTableManager.map_memory((void*)i, (void*)i);
+    for (uint64_t i = 0; i < get_memory_size(boot_info->mMap, mMapEntries, boot_info->mMapDescSize); i += 0x1000) {
+        g_page_table_manager.map_memory((void*)i, (void*)i);
     }
 
     // lock pages for frambuffer
@@ -32,15 +31,17 @@ void prepare_memory(BootInfo* boot_info) {
     allocator.LockPages((void*)fbBase, fbSize / 0x1000 + 1);
 
     // map pages for framebuffer
-    for (uint64_t i = fbBase; i < fbBase + fbSize; i+=4096) {
-        pageTableManager.map_memory((void*)i, (void*)i);
+    for (uint64_t i = fbBase; i < fbBase + fbSize; i += 4096) {
+        g_page_table_manager.map_memory((void*)i, (void*)i);
     }
 
     // actually apply the memory map
-    asm ("mov %0, %%cr3" : : "r" (PML4));
+    asm("mov %0, %%cr3"
+        :
+        : "r"(PML4));
 
     // prepare kernel info
-    kernel_info.page_table_manager = &pageTableManager;
+    kernel_info.page_table_manager = &g_page_table_manager;
 }
 
 IDTR idtr;
@@ -61,9 +62,19 @@ void prepare_interupts() {
     SetIDTGate((void*)KeyboardInterupt_handler, 0x21, IDT_TA_InterruptGate, 0x08);
     SetIDTGate((void*)MouseInterupt_handler, 0x2c, IDT_TA_InterruptGate, 0x08);
 
-    asm("lidt %0" : : "m" (idtr));
+    asm("lidt %0"
+        :
+        : "m"(idtr));
 
     remap_pic();
+}
+
+void prepare_acpi(BootInfo* boot_info) {
+    ACPI::SDTHeader* xsdt = (ACPI::SDTHeader*)(boot_info->rsdp->xsdt_address);
+
+    ACPI::MCFGHeader* mcfg = (ACPI::MCFGHeader*)ACPI::find_table(xsdt, (char*)"MCFG");
+
+    PCI::enumerate_PCI(mcfg);
 }
 
 BasicRenderer r = BasicRenderer(NULL, NULL);
@@ -87,6 +98,8 @@ KernelInfo initialize_kernel(BootInfo* boot_info) {
     prepare_interupts();
 
     init_ps2mouse();
+
+    prepare_acpi(boot_info);
 
     // set interupts bits
     outb(PIC1_DATA, 0b11111001);
