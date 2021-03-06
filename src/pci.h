@@ -26,4 +26,5 @@ void enumerate_PCI(ACPI::MCFGHeader* mcfg);
 extern const char* device_classes[];
 
 const char* get_vendor_name(uint16_t vendor_id);
+const char* get_device_name(uint16_t vendor_id, uint16_t device_id);
 }
