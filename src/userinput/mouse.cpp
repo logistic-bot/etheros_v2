@@ -75,24 +75,25 @@ bool mouse_packet_ready = false;
 Point mouse_position;
 Point old_mouse_position;
 void handle_ps2_mouse(uint8_t data) {
+    process_mouse_packets();
+    static bool skip = true;
+    if (skip) {
+        skip = false;
+        return;
+    }
+
     switch (mouse_cycle) {
     case 0:
-        if (mouse_packet_ready)
-            break;
-        if (data & 0b00001000 == 0)
+        if ((data & 0b00001000) == 0)
             break;
         mouse_packets[0] = data;
         mouse_cycle++;
         break;
     case 1:
-        if (mouse_packet_ready)
-            break;
         mouse_packets[1] = data;
         mouse_cycle++;
         break;
     case 2:
-        if (mouse_packet_ready)
-            break;
         mouse_packets[2] = data;
         mouse_packet_ready = true;
         mouse_cycle = 0;
