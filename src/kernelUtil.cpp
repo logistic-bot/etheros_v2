@@ -1,4 +1,5 @@
 #include "kernelUtil.h"
+#include "memory/heap.h"
 
 KernelInfo kernel_info;
 void prepare_memory(BootInfo* boot_info) {
@@ -93,6 +94,8 @@ KernelInfo initialize_kernel(BootInfo* boot_info) {
 
     // Cleak screen
     memset(boot_info->framebuffer->BaseAddress, 0, boot_info->framebuffer->BufferSize);
+
+    initialize_heap((void*)0x0000100000000000, 0x10);
 
     // prepare interupts
     prepare_interupts();

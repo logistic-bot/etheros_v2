@@ -45,6 +45,8 @@ keyboard/scancodes.h
 math.h
 memory.cpp
 memory.h
+memory/heap.cpp
+memory/heap.h
 paging/PageFrameAllocator.cpp
 paging/PageFrameAllocator.h
 paging/PageMapIndexer.cpp
