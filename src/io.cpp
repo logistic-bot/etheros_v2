@@ -60,3 +60,21 @@ void write_serial(char c) {
         ;
     outb(SERIAL_PORT, c);
 }
+
+void serial_print(const char* str) {
+    char* chr = (char*)str;
+    while (*chr != 0) {
+        write_serial(*chr);
+        chr++;
+    }
+}
+
+void serial_println(const char* str) {
+    char* chr = (char*)str;
+    while (*chr != 0) {
+        write_serial(*chr);
+        chr++;
+    }
+    write_serial('\n');
+    write_serial('\r');
+}

@@ -8,7 +8,7 @@ extern "C" void _start(BootInfo* bootInfo) {
     renderer->print("Kernel Initialized Sucessfully");
     renderer->next();
 
-    write_serial('c');
+    serial_println("Kernel Initialized Sucessfully");
 
     while (true) {
         renderer->putChar(read_serial());
