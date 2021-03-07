@@ -101,3 +101,24 @@ void expand_heap(size_t length) {
     new_segment->length = length - sizeof(HeapSegmentHeader);
     new_segment->combine_backward();
 }
+
+void HeapSegmentHeader::combine_forward() {
+    if (next == NULL)
+        return;
+    if (!next->free)
+        return;
+
+    if (next == last_header)
+        last_header = this;
+
+    if (next->next != NULL) {
+        next->next->last = this;
+    }
+
+    length = length + next->length + sizeof(HeapSegmentHeader);
+}
+
+void HeapSegmentHeader::combine_backward() {
+    if (last != NULL && last->free)
+        last->combine_forward();
+}
