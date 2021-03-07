@@ -24,3 +24,41 @@ void initialize_heap(void* heap_address, size_t page_count) {
     start_segment->free = true;
     last_header = start_segment;
 }
+
+void* malloc(size_t size) {
+    if (size % 0x10 > 0) {
+        // not a multiple of 128
+        size -= (size % 0x10);
+        size += 0x10;
+    }
+
+    if (size == 0) {
+        return NULL;
+    }
+
+    HeapSegmentHeader* current_segment = (HeapSegmentHeader*)heap_start;
+    while (true) {
+        if (current_segment->free) {
+            if (current_segment->length > size) {
+                current_segment->split(size);
+                current_segment->free = false;
+                return (void*)((uint64_t)current_segment + sizeof(HeapSegmentHeader));
+            }
+            if (current_segment->length == size) {
+                current_segment->free = false;
+                return (void*)((uint64_t)current_segment + sizeof(HeapSegmentHeader));
+            }
+        }
+        if (current_segment->next == NULL)
+            break;
+        current_segment = current_segment->next;
+    }
+    expand_heap(size);
+    return malloc(size);
+}
+
+HeapSegmentHeader* HeapSegmentHeader::split(size_t split_length) {
+}
+
+void expand_heap(size_t length) {
+}

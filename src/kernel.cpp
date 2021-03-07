@@ -1,4 +1,5 @@
 #include "kernelUtil.h"
+#include "memory/heap.h"
 
 extern "C" void _start(BootInfo* bootInfo) {
     // initialize kernel
@@ -8,6 +9,8 @@ extern "C" void _start(BootInfo* bootInfo) {
 
     renderer->print("Kernel Initialized Sucessfully");
     renderer->next();
+
+    renderer->print(to_hstring((uint64_t)malloc(0x100)));
 
     //    uint64_t pages = 0;
     //    while (true) {
