@@ -80,4 +80,24 @@ HeapSegmentHeader* HeapSegmentHeader::split(size_t split_length) {
 }
 
 void expand_heap(size_t length) {
+    if (length % 0x1000) {
+        length -= (length % 0x1000);
+        length += 0x1000;
+    }
+
+    size_t page_count = length / 0x1000;
+    HeapSegmentHeader* new_segment = (HeapSegmentHeader*)heap_end;
+
+    for (size_t i = 0; i < page_count; i++) {
+        g_page_table_manager.map_memory(heap_end, allocator.request_page());
+        heap_end = (void*)((size_t)heap_end + 0x1000);
+    }
+
+    new_segment->free = true;
+    new_segment->last = last_header;
+    last_header->next = new_segment;
+    last_header = new_segment;
+    new_segment->next = NULL;
+    new_segment->length = length - sizeof(HeapSegmentHeader);
+    new_segment->combine_backward();
 }
