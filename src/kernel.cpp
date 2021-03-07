@@ -10,11 +10,16 @@ extern "C" void _start(BootInfo* bootInfo) {
     renderer->print("Kernel Initialized Sucessfully");
     renderer->next();
 
-    renderer->print(to_hstring((uint64_t)malloc(0x100)));
+    renderer->print(to_hstring((uint64_t)malloc(0x8000)));
     renderer->next();
-    renderer->print(to_hstring((uint64_t)malloc(0x100)));
+    void* address = malloc(0x8000);
+    renderer->print(to_hstring((uint64_t)address));
     renderer->next();
-    renderer->print(to_hstring((uint64_t)malloc(0x100)));
+    renderer->print(to_hstring((uint64_t)malloc(0x8000)));
+    renderer->next();
+
+    free(address);
+    renderer->print(to_hstring((uint64_t)malloc(0x8000)));
     renderer->next();
 
     //    uint64_t pages = 0;

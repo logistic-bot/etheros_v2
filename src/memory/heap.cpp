@@ -25,6 +25,13 @@ void initialize_heap(void* heap_address, size_t page_count) {
     last_header = start_segment;
 }
 
+void free(void* address) {
+    HeapSegmentHeader* segment = (HeapSegmentHeader*)address - 1;
+    segment->free = true;
+    segment->combine_forward();
+    segment->combine_backward();
+}
+
 void* malloc(size_t size) {
     if (size % 0x10 > 0) {
         // not a multiple of 128
