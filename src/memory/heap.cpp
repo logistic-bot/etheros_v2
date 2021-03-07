@@ -58,6 +58,25 @@ void* malloc(size_t size) {
 }
 
 HeapSegmentHeader* HeapSegmentHeader::split(size_t split_length) {
+    if (split_length < 0x10) {
+        return NULL;
+    }
+    int64_t split_segment_length = length - split_length - (sizeof(HeapSegmentHeader));
+    if (split_segment_length < 0x10)
+        return NULL;
+
+    HeapSegmentHeader* new_split_header = (HeapSegmentHeader*)((size_t)this + split_length + sizeof(HeapSegmentHeader));
+    next->last = new_split_header;
+    new_split_header->next = next;
+    next = new_split_header;
+    new_split_header->last = this;
+    new_split_header->length = split_segment_length;
+    new_split_header->free = free;
+    length = split_length;
+
+    if (last_header == this)
+        last_header = new_split_header;
+    return new_split_header;
 }
 
 void expand_heap(size_t length) {

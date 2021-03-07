@@ -11,6 +11,11 @@ extern "C" void _start(BootInfo* bootInfo) {
     renderer->next();
 
     renderer->print(to_hstring((uint64_t)malloc(0x100)));
+    renderer->next();
+    renderer->print(to_hstring((uint64_t)malloc(0x100)));
+    renderer->next();
+    renderer->print(to_hstring((uint64_t)malloc(0x100)));
+    renderer->next();
 
     //    uint64_t pages = 0;
     //    while (true) {
