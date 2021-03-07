@@ -111,5 +111,8 @@ KernelInfo initialize_kernel(BootInfo* boot_info) {
     // enable interupts
     asm("sti");
 
+    // serial port
+    initialize_serial();
+
     return kernel_info;
 }

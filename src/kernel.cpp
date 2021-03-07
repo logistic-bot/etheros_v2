@@ -4,23 +4,15 @@
 extern "C" void _start(BootInfo* bootInfo) {
     // initialize kernel
     KernelInfo kernel_info = initialize_kernel(bootInfo);
-    // get page table manager
-    PageTableManager* pageTableManager = kernel_info.page_table_manager;
 
     renderer->print("Kernel Initialized Sucessfully");
     renderer->next();
 
-    renderer->print(to_hstring((uint64_t)malloc(0x8000)));
-    renderer->next();
-    void* address = malloc(0x8000);
-    renderer->print(to_hstring((uint64_t)address));
-    renderer->next();
-    renderer->print(to_hstring((uint64_t)malloc(0x8000)));
-    renderer->next();
+    write_serial('c');
 
-    free(address);
-    renderer->print(to_hstring((uint64_t)malloc(0x8000)));
-    renderer->next();
+    while (true) {
+        renderer->putChar(read_serial());
+    }
 
     //    uint64_t pages = 0;
     //    while (true) {
