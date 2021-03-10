@@ -59,9 +59,10 @@ void prepare_interupts() {
 
     SetIDTGate((void*)PageFault_handler, 0xe, IDT_TA_InterruptGate, 0x08);
     SetIDTGate((void*)DoubleFault_handler, 0x8, IDT_TA_InterruptGate, 0x08);
-    SetIDTGate((void*)GPFault_handler, 0xd, IDT_TA_InterruptGate, 0x08);
+    SetIDTGate((void*)GPFault_handler, 0xd, IDT_TA_InterruptGate, 0x8);
     SetIDTGate((void*)KeyboardInterupt_handler, 0x21, IDT_TA_InterruptGate, 0x08);
     SetIDTGate((void*)MouseInterupt_handler, 0x2c, IDT_TA_InterruptGate, 0x08);
+    SetIDTGate((void*)PITInterupt_handler, 0x20, IDT_TA_InterruptGate, 0x08);
 
     asm("lidt %0"
         :
@@ -80,38 +81,51 @@ void prepare_acpi(BootInfo* boot_info) {
 
 BasicRenderer r = BasicRenderer(NULL, NULL);
 KernelInfo initialize_kernel(BootInfo* boot_info) {
+    serial_println("Initializing kernel...");
     // prepare global renderer
+    serial_println("Setting up renderer");
     r = BasicRenderer(boot_info->framebuffer, boot_info->psf1_font);
     renderer = &r;
 
     // Load new GDT
+    serial_println("Setting up GDT");
     GDTDescriptor gdtDescriptor;
     gdtDescriptor.size = sizeof(GDT) - 1;
     gdtDescriptor.offset = (uint64_t)&default_gdt;
+    serial_println("Loading GDT");
     LoadGDT(&gdtDescriptor);
 
+    serial_println("Preapring memory");
     prepare_memory(boot_info);
 
     // Cleak screen
+    serial_println("Clearing screen");
     memset(boot_info->framebuffer->BaseAddress, 0, boot_info->framebuffer->BufferSize);
 
+    serial_println("Initializing heap");
     initialize_heap((void*)0x0000100000000000, 0x10);
 
     // prepare interupts
+    serial_println("Preparing interupts");
     prepare_interupts();
 
+    serial_println("Initializing mouse");
     init_ps2mouse();
 
+    serial_println("Preparing acpi");
     prepare_acpi(boot_info);
 
     // set interupts bits
-    outb(PIC1_DATA, 0b11111001);
+    serial_println("Setting interupt bits");
+    outb(PIC1_DATA, 0b11111000);
     outb(PIC2_DATA, 0b11101111);
 
     // enable interupts
+    serial_println("Enabeling interupts");
     asm("sti");
 
     // serial port
+    serial_println("Initializing serial communications");
     initialize_serial();
 
     return kernel_info;

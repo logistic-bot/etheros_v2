@@ -1,18 +1,22 @@
-﻿#include "interupts.h"
+#include "interupts.h"
+#include "../scheduling/pit/pit.h"
 
 __attribute__((interrupt)) void PageFault_handler(struct interrupt_frame* frame) {
     panic("Page fault detected");
-    while (true);
+    while (true)
+        ;
 }
 
 __attribute__((interrupt)) void GPFault_handler(struct interrupt_frame* frame) {
     panic("General Protection fault detected");
-    while (true);
+    while (true)
+        ;
 }
 
 __attribute__((interrupt)) void DoubleFault_handler(struct interrupt_frame* frame) {
     panic("Double fault detected");
-    while (true);
+    while (true)
+        ;
 }
 
 __attribute__((interrupt)) void KeyboardInterupt_handler(struct interrupt_frame* frame) {
@@ -25,6 +29,11 @@ __attribute__((interrupt)) void MouseInterupt_handler(interrupt_frame* frame) {
     uint8_t mouse_data = inb(0x60);
     handle_ps2_mouse(mouse_data);
     pic_end_slave();
+}
+
+__attribute__((interrupt)) void PITInterupt_handler(interrupt_frame* frame) {
+    PIT::tick();
+    pic_end_master();
 }
 
 void pic_end_master() {

@@ -11,6 +11,8 @@ Framebuffer.h
 Makefile
 acpi.cpp
 acpi.h
+consolerenderer.cpp
+consolerenderer.h
 cstr.cpp
 cstr.h
 efiMemory.cpp
@@ -58,6 +60,8 @@ paging/paging.h
 panic.cpp
 panic.h
 pci_descriptors.cpp
+scheduling/pit/pit.cpp
+scheduling/pit/pit.h
 simpleFonts.h
 userinput/keyboard.cpp
 userinput/keyboard.h

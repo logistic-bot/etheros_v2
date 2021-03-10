@@ -7,8 +7,8 @@ LDS = kernel.ld
 ASMC = nasm
 CC = gcc
 
-CFLAGS = -ffreestanding -fshort-wchar -static -Wall -Wpedantic -Wextra -fpermissive -mno-red-zone
-ASMFLAGS = -wall
+CFLAGS = -ffreestanding -fshort-wchar -mno-red-zone -g -O0
+ASMFLAGS = 
 LDFLAGS = -T $(LDS) -static -Bsymbolic -nostdlib
 
 SRCDIR := src
@@ -25,16 +25,29 @@ OBJS += $(patsubst $(SRCDIR)/%.asm, $(OBJDIR)/%_asm.o, $(ASMSRC))
 
 DIRS = $(wildcard $(SRCDIR)/*)
 
-run:
+run: all
 	qemu-system-x86_64 -machine q35 -drive file=$(BUILDDIR)/$(OSNAME).img,format=raw -m 256M -cpu qemu64 -drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF_CODE-pure-efi.fd",readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS-pure-efi.fd" -net none -serial stdio
+
+all: $(BUILDDIR)/$(OSNAME).img
+	
+debug: all
+	qemu-system-x86_64 -machine q35 -drive file=$(BUILDDIR)/$(OSNAME).img,format=raw -m 256M -cpu qemu64 -drive if=pflash,format=raw,unit=0,file="$(OVMFDIR)/OVMF_CODE-pure-efi.fd",readonly=on -drive if=pflash,format=raw,unit=1,file="$(OVMFDIR)/OVMF_VARS-pure-efi.fd" -net none -serial stdio -s -S
 vars:
 	echo $(SRC)
 	echo $(OBJS)
 	echo $(DIRS)
+	
+$(BUILDDIR)/$(OSNAME).img: $(OBJS) $(BUILDDIR)/kernel.elf
+	dd if=/dev/zero of=$(BUILDDIR)/$(OSNAME).img bs=512 count=93750
+	mformat -i $(BUILDDIR)/$(OSNAME).img -f 1440 ::
+	mmd -i $(BUILDDIR)/$(OSNAME).img ::/EFI
+	mmd -i $(BUILDDIR)/$(OSNAME).img ::/EFI/BOOT
+	mcopy -i $(BUILDDIR)/$(OSNAME).img $(BOOTEFI) ::/EFI/BOOT
+	mcopy -i $(BUILDDIR)/$(OSNAME).img startup.nsh ::
+	mcopy -i $(BUILDDIR)/$(OSNAME).img $(BUILDDIR)/kernel.elf ::
+	mcopy -i $(BUILDDIR)/$(OSNAME).img $(BUILDDIR)/zap-light16.psf ::
 
 	
-kernel: $(OBJS) link
-
 $(OBJDIR)/interupts/interupts.o: $(SRCDIR)/interupts/interupts.cpp
 	@echo !==== COMPILING $^
 	@mkdir -p $(@D)
@@ -50,7 +63,7 @@ $(OBJDIR)/%_asm.o: $(SRCDIR)/%.asm
 	@mkdir -p $(@D)
 	$(ASMC) $(ASMFLAGS) $^ -f elf64 -o $@
 
-link:
+$(BUILDDIR)/kernel.elf: $(OBJS)
 	@echo !==== LINKING
 	$(LD) $(LDFLAGS) -o $(BUILDDIR)/kernel.elf $(OBJS)
 
@@ -61,14 +74,3 @@ setup:
 
 clean:
 	rm -f $(OBJS)
-
-buildimg:
-	dd if=/dev/zero of=$(BUILDDIR)/$(OSNAME).img bs=512 count=93750
-	mformat -i $(BUILDDIR)/$(OSNAME).img -f 1440 ::
-	mmd -i $(BUILDDIR)/$(OSNAME).img ::/EFI
-	mmd -i $(BUILDDIR)/$(OSNAME).img ::/EFI/BOOT
-	mcopy -i $(BUILDDIR)/$(OSNAME).img $(BOOTEFI) ::/EFI/BOOT
-	mcopy -i $(BUILDDIR)/$(OSNAME).img startup.nsh ::
-	mcopy -i $(BUILDDIR)/$(OSNAME).img $(BUILDDIR)/kernel.elf ::
-	mcopy -i $(BUILDDIR)/$(OSNAME).img $(BUILDDIR)/zap-light16.psf ::
-

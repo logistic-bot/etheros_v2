@@ -7,3 +7,5 @@ keyboard
 userinput
 ../../gnu-efi/bootloader
 memory
+debug
+scheduling/pit

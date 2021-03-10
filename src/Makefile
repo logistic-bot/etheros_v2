@@ -9,5 +9,4 @@ OBJS = $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRC))
 DIRS = $(wildcard $(SRCDIR)/*)
 
 all:
-	make -C .. kernel
-	make -C .. buildimg
+	make -C .. all
