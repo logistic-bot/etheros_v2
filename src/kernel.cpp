@@ -1,3 +1,4 @@
+#include "colors.h"
 #include "kernelUtil.h"
 #include "memory/heap.h"
 #include "scheduling/pit/pit.h"
@@ -9,22 +10,12 @@ extern "C" void _start(BootInfo* bootInfo) {
     renderer->print("Kernel Initialized Sucessfully");
     serial_println("");
     renderer->next();
-
     PIT::set_divisor(200);
 
-    serial_print(to_string(PIT::time_since_boot));
-    serial_print(" ");
-    renderer->rect(100, 100, 100, 100);
-    serial_println(to_string(PIT::time_since_boot));
+    renderer->background_color = 0;
+    renderer->clear();
 
-    uint32_t x = 0;
-    uint32_t y = 0;
-    while (true) {
-        renderer->rect(x, y, 10, 10);
-        //        PIT::sleep_ms(100);
-        renderer->rect(x, y, 10, 10, renderer->background_color);
-        x++;
-    }
+    show_pallete(0, 0, 16);
 
     //    uint64_t pages = 0;
     //    while (true) {

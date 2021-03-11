@@ -98,9 +98,8 @@ KernelInfo initialize_kernel(BootInfo* boot_info) {
     serial_println("Preapring memory");
     prepare_memory(boot_info);
 
-    // Cleak screen
     serial_println("Clearing screen");
-    memset(boot_info->framebuffer->BaseAddress, 0, boot_info->framebuffer->BufferSize);
+    renderer->clear();
 
     serial_println("Initializing heap");
     initialize_heap((void*)0x0000100000000000, 0x10);

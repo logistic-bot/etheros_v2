@@ -1,4 +1,5 @@
 #include "BasicRenderer.h"
+#include "colors.h"
 #include "io.h"
 
 BasicRenderer* renderer;
@@ -7,8 +8,8 @@ BasicRenderer::BasicRenderer(Framebuffer* targetFramebuffer_, PSF1_FONT* font_) 
     targetFramebuffer = targetFramebuffer_;
     font = font_;
 
-    color = 0xffffffff;
-    background_color = 0;
+    color = COLOR_FOREGROUND_NORMAL;
+    background_color = COLOR_BACKGROUND_NORMAL;
     cursorPosition = { 0, 0 };
 }
 
