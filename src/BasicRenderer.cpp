@@ -1,5 +1,6 @@
 #include "BasicRenderer.h"
 #include "colors.h"
+#include "cstr.h"
 #include "io.h"
 
 BasicRenderer* renderer;
@@ -96,7 +97,7 @@ void BasicRenderer::clear() {
     }
 }
 
-void BasicRenderer::clear_char() {
+void BasicRenderer::clear_char(unsigned int color) {
     if (cursorPosition.x == 0) {
         cursorPosition.x = targetFramebuffer->Width;
         cursorPosition.y -= 16;
@@ -111,7 +112,7 @@ void BasicRenderer::clear_char() {
     unsigned int* pixelPointer = (unsigned int*)targetFramebuffer->BaseAddress;
     for (unsigned long y = yOff; y < yOff + 16; y++) {
         for (unsigned long x = xOff - 8; x < xOff; x++) {
-            *(unsigned int*)(pixelPointer + x + (y * targetFramebuffer->PixelsPerScanline)) = background_color;
+            *(unsigned int*)(pixelPointer + x + (y * targetFramebuffer->PixelsPerScanline)) = color;
         }
     }
 
@@ -125,6 +126,10 @@ void BasicRenderer::clear_char() {
     }
 }
 
+void BasicRenderer::clear_char() {
+    this->clear_char(this->background_color);
+}
+
 void BasicRenderer::next() {
     cursorPosition.x = 0;
     cursorPosition.y += 16;
@@ -136,9 +141,18 @@ void BasicRenderer::center() {
 }
 
 void BasicRenderer::print(const char* str) {
+    this->print(str, color);
+}
+
+void BasicRenderer::println(const char* str) {
+    this->print(str);
+    this->next();
+}
+
+void BasicRenderer::print(const char* str, unsigned int color) {
     char* chr = (char*)str;
     while (*chr != 0) {
-        putChar(*chr, cursorPosition.x, cursorPosition.y);
+        putChar(*chr, cursorPosition.x, cursorPosition.y, color);
         cursorPosition.x += 8;
         if (cursorPosition.x + 8 > targetFramebuffer->Width) {
             cursorPosition.x = 0;
@@ -148,8 +162,16 @@ void BasicRenderer::print(const char* str) {
     }
     serial_print(str);
 }
+void BasicRenderer::println(const char* str, unsigned int color) {
+    this->print(str, color);
+    this->next();
+}
 
 void BasicRenderer::putChar(char chr, unsigned int xOff, unsigned int yOff) {
+    this->putChar(chr, xOff, yOff, color);
+}
+
+void BasicRenderer::putChar(char chr, unsigned int xOff, unsigned int yOff, unsigned int color) {
     unsigned int* pixelPointer = (unsigned int*)targetFramebuffer->BaseAddress;
     char* fontPtr = (char*)font->glyphBuffer + (chr * font->psf_header->charsize);
     for (unsigned long y = yOff; y < yOff + font->psf_header->charsize; y++) {
@@ -167,5 +189,73 @@ void BasicRenderer::putChar(char chr) {
     cursorPosition.x += 8;
     if (cursorPosition.x + 8 > targetFramebuffer->Width) {
         next();
+    }
+}
+
+void BasicRenderer::show_text_cursor() {
+    this->show_text_cursor(this->text_cursor_position.x, this->text_cursor_position.y);
+}
+
+void BasicRenderer::show_text_cursor(uint32_t x, uint32_t y) {
+    switch (this->text_cursor_shape) {
+    case TextCursorShape::IBeam:
+        this->show_i_beam_text_cursor(x, y);
+        break;
+    case TextCursorShape::Block:
+        this->show_block_text_cursor(x, y);
+        break;
+    default:
+        show_i_beam_text_cursor(x, y);
+    }
+}
+void BasicRenderer::show_i_beam_text_cursor(uint32_t x, uint32_t y) {
+    this->rect(x + 1, y + 1, 1, 14, COLOR_ACCENT);
+}
+void BasicRenderer::show_block_text_cursor(uint32_t x, uint32_t y) {
+    unsigned int background = background_color;
+    unsigned int foreground = color;
+    unsigned int c;
+    bool got_background = false;
+    bool done = false;
+    for (uint32_t x_pos = x; x_pos < x + 8; x_pos++) {
+        for (uint32_t y_pos = y; y_pos < y + 16; y_pos++) {
+            c = getPix(x_pos, y_pos);
+            if (got_background) {
+                if (c != foreground) {
+                    foreground = c;
+                    continue;
+                }
+            } else {
+                background = c;
+                got_background = true;
+                continue;
+            }
+            done = true;
+            break;
+        }
+        if (done) {
+            break;
+        }
+    }
+
+    // This is a dirty fix. In the future, each character should have a foreground and background color, and this will make this much easier.
+    if (background == foreground) {
+        foreground = COLOR_FOREGROUND_HIGHLIGHT;
+    }
+    serial_println("");
+    serial_println(to_hstring((uint64_t)background));
+    serial_println(to_hstring((uint64_t)foreground));
+
+    for (uint32_t x_pos = x; x_pos < x + 8; x_pos++) {
+        for (uint32_t y_pos = y; y_pos < y + 16; y_pos++) {
+            if (getPix(x_pos, y_pos) == background) {
+                putPix(x_pos, y_pos, foreground);
+                serial_print("2");
+            } else {
+                putPix(x_pos, y_pos, background);
+                serial_print("1");
+            }
+        }
+        serial_println("");
     }
 }

@@ -21,7 +21,7 @@ __attribute__((interrupt)) void DoubleFault_handler(struct interrupt_frame* fram
 
 __attribute__((interrupt)) void KeyboardInterupt_handler(struct interrupt_frame* frame) {
     uint8_t scancode = inb(0x60);
-    HandleKeyboard(scancode);
+    Keyboard::HandleKeyboard(scancode);
     pic_end_master();
 }
 

@@ -27,3 +27,5 @@ void show_pallete(uint32_t origin_x, uint32_t origin_y, uint32_t size);
 #define COLOR_NO 0xff2424
 #define COLOR_NO_INACTIVE 0xdb1f1f
 #define COLOR_NO_DIM COLOR_NO_INACTIVE
+
+#define COLOR_SEPARATOR 0x2b2b2b
