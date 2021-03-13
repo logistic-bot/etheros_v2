@@ -74,3 +74,6 @@ setup:
 
 clean:
 	rm -f $(OBJS)
+
+move: $(BUILDDIR)/$(OSNAME).img
+	zip $(BUILDDIR)/$(OSNAME).zip $(BUILDDIR)/$(OSNAME).img -uv9

@@ -1,4 +1,5 @@
 lib/
+bin/*.zip
 bin/*.i64
 bin/*.img
 bin/*.elf
