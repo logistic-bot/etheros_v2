@@ -99,6 +99,7 @@ extern "C" void _start(BootInfo* bootInfo) {
     renderer->println("Kernel Initialized Sucessfully");
     renderer->next();
     PIT::set_divisor(100);
+    PIT::sleep_ms(1);
 
     renderer->text_cursor_position = { 8, renderer->targetFramebuffer->Height - 16 };
 

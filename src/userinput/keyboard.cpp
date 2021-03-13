@@ -42,6 +42,12 @@ void HandleKeyboard(uint8_t code) {
 
     char ascii = AZERTYKeyboard::translate(scancode, isLeftShiftPressed | isRightShiftPressed);
     key = ascii;
+
+    serial_print("KBD ");
+    serial_print(to_hstring(scancode));
+    serial_print(" ");
+    serial_print(ascii);
+    serial_println("");
 }
 
 void wait_for_key() {

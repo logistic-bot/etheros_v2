@@ -15,3 +15,6 @@ int is_transmit_empty();
 void write_serial(char c);
 void serial_print(const char* str);
 void serial_println(const char* str);
+
+void serial_print(const char chr);
+void serial_println(const char chr);

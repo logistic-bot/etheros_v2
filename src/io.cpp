@@ -78,3 +78,17 @@ void serial_println(const char* str) {
     write_serial('\n');
     write_serial('\r');
 }
+
+void serial_println(const char chr) {
+    if (chr != 0) {
+        write_serial(chr);
+    }
+    write_serial('\n');
+    write_serial('\r');
+}
+
+void serial_print(const char chr) {
+    if (chr != 0) {
+        write_serial(chr);
+    }
+}
