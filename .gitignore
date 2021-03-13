@@ -1,0 +1,4 @@
+lib/
+bin/*.i64
+bin/*.img
+bin/*.elf
