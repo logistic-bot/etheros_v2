@@ -10,7 +10,7 @@ extern "C" void _start(BootInfo* bootInfo) {
 
     // prevent crash on real hardware
     while (true)
-        ;
+        asm("hlt");
 }
 
 // KNOWN BUG (MAYBE RESOLVED): (with 256M of memory) when allocating 56944 pages, GetFreeRAM() returns stranges, waytoobig values (> 10000000000). OOM happens at 56952 pages.
