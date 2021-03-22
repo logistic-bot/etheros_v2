@@ -11,6 +11,8 @@ Framebuffer.h
 Makefile
 acpi.cpp
 acpi.h
+ahci/ahci.cpp
+ahci/ahci.h
 colors.cpp
 colors.h
 consolerenderer.cpp

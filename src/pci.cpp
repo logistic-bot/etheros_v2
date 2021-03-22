@@ -1,4 +1,8 @@
 #include "pci.h"
+#include "ahci/ahci.h"
+#include "io.h"
+#include "memory/heap.h"
+
 namespace PCI {
 void enumerate_function(uint64_t device_address, uint64_t function) {
     uint64_t offset = function << 12;
@@ -12,16 +16,26 @@ void enumerate_function(uint64_t device_address, uint64_t function) {
     if (pci_device_header->device_id == 0xffff)
         return;
 
-    //    renderer->print(get_vendor_name(pci_device_header->vendor_id));
-    //    renderer->print(" / ");
-    //    renderer->print(get_device_name(pci_device_header->vendor_id, pci_device_header->device_id));
-    //    renderer->print(" / ");
-    //    renderer->print(device_classes[pci_device_header->class_id]);
-    //    renderer->print(" / ");
-    //    renderer->print(get_subclass_name(pci_device_header->class_id, pci_device_header->subclass_id));
-    //    renderer->print(" / ");
-    //    renderer->print(get_program_interface_name(pci_device_header->class_id, pci_device_header->subclass_id, pci_device_header->program_interface));
-    //    renderer->next();
+    serial_print(get_vendor_name(pci_device_header->vendor_id));
+    serial_print(" / ");
+    serial_print(get_device_name(pci_device_header->vendor_id, pci_device_header->device_id));
+    serial_print(" / ");
+    serial_print(device_classes[pci_device_header->class_id]);
+    serial_print(" / ");
+    serial_print(get_subclass_name(pci_device_header->class_id, pci_device_header->subclass_id));
+    serial_print(" / ");
+    serial_println(get_program_interface_name(pci_device_header->class_id, pci_device_header->subclass_id, pci_device_header->program_interface));
+
+    switch (pci_device_header->class_id) {
+    case 0x01: // Mass storage controller
+        switch (pci_device_header->subclass_id) {
+        case 0x06: // serial ATA
+            switch (pci_device_header->program_interface) {
+            case 0x01: // AHCI 1.0 device
+                new AHCI::AHCIDriver(pci_device_header);
+            }
+        }
+    }
 }
 
 void enumerate_device(uint64_t bus_address, uint64_t device) {
