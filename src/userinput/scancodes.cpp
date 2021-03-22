@@ -83,7 +83,6 @@ char translate(uint8_t scancode, bool uppercase) {
     else if (scancode == 0x28) // ù
         return '-';
 
-    renderer->putChar(ASCIITable[scancode]);
     return ASCIITable[scancode];
 }
 }

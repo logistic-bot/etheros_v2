@@ -7,6 +7,11 @@
 namespace Keyboard {
 extern bool isLeftShiftPressed;
 extern bool isRightShiftPressed;
+extern bool isExtended;
+extern bool isLeftAltPressed;
+extern bool isRightAltGrPressed;
+extern bool isLeftControlPressed;
+extern bool isRightControlPressed;
 extern char key;
 extern uint8_t scancode;
 extern bool updated;

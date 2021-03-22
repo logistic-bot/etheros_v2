@@ -1,7 +1,6 @@
 #include "BasicRenderer.h"
 #include "colors.h"
 #include "cstr.h"
-#include "io.h"
 
 BasicRenderer* renderer;
 
@@ -160,7 +159,6 @@ void BasicRenderer::print(const char* str, unsigned int color) {
         }
         chr++;
     }
-    serial_print(str);
 }
 void BasicRenderer::println(const char* str, unsigned int color) {
     this->print(str, color);
@@ -242,20 +240,14 @@ void BasicRenderer::show_block_text_cursor(uint32_t x, uint32_t y) {
     if (background == foreground) {
         foreground = COLOR_FOREGROUND_HIGHLIGHT;
     }
-    serial_println("");
-    serial_println(to_hstring((uint64_t)background));
-    serial_println(to_hstring((uint64_t)foreground));
 
     for (uint32_t x_pos = x; x_pos < x + 8; x_pos++) {
         for (uint32_t y_pos = y; y_pos < y + 16; y_pos++) {
             if (getPix(x_pos, y_pos) == background) {
                 putPix(x_pos, y_pos, foreground);
-                serial_print("2");
             } else {
                 putPix(x_pos, y_pos, background);
-                serial_print("1");
             }
         }
-        serial_println("");
     }
 }
